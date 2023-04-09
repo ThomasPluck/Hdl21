@@ -12,7 +12,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
+    container: tpluck95/vlsir-test-container
     # Notes on this matrix, particularly the dependencies part:
     # This sets up testing with dependencies from both (a) PyPi and (b) "dev" versions from GitHub.
     # This is particularly relevant for VLSIR, which is often co-developed.
@@ -27,12 +27,19 @@ jobs:
     continue-on-error: ${{ matrix.dep-installer == 'pypi' }}
 
     steps:
-      - uses: actions/checkout@v2
+
+      - name: Install SKY130 PDK
+        run: |
+          scripts/install-sky130pdk.sh
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
+        run: |
+          apt-get install -y python${{ matrix.python-version }}
+          apt-get install -y python${{ matrix.python-version }}-dev
+          apt-get install -y python${{ matrix.python-version }}-venv
+          apt-get install -y python${{ matrix.python-version }}-distutils
+
+      - uses: actions/checkout@v2
 
       - name: Install dependencies
         run: bash scripts/install-${{ matrix.dep-installer }}.sh
