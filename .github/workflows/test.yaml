@@ -37,15 +37,17 @@ jobs:
           apt-get install -y python${{ matrix.python-version }}-venv
           apt-get install -y python${{ matrix.python-version }}-distutils
 
-      - name: Install dependencies
-        run: bash scripts/install-${{ matrix.dep-installer }}.sh
-
       - name: pytest `bindings/python`
         run: |
           python${{ matrix.python-version }} -m venv ./venv
           . ./venv/bin/activate
-          cd bindings/python
+          bash scripts/install-${{ matrix.dep-installer }}.sh          
           python${{ matrix.python-version }} -m pip install -e ".[dev]"
+          cd pdks/Sky130
+          python${{ matrix.python-version }} -m pip install -e ".[dev]"
+          cd ../../SampleSitePdks
+          python${{ matrix.python-version }} -m pip install -e ".[dev]"
+          cd ..
           python${{ matrix.python-version }} -m pytest -sv --cov=./ --cov-report=xml
 
       - name: Black Formatting Check
